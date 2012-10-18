@@ -26,7 +26,6 @@ class FacebookDebugCanvasMiddleware(object):
         cp = request.POST.copy()
         request.POST = cp
         request.POST['signed_request'] = settings.FACEBOOK_DEBUG_SIGNEDREQ
-        return None
 
 
 class FacebookDebugCookieMiddleware(object):
@@ -43,7 +42,6 @@ class FacebookDebugCookieMiddleware(object):
     def process_request(self, request):
         cookie_name = "fbs_" + settings.FACEBOOK_APP_ID
         request.COOKIES[cookie_name] = settings.FACEBOOK_DEBUG_COOKIE
-        return None
 
 
 class FacebookDebugTokenMiddleware(object):
@@ -60,7 +58,6 @@ class FacebookDebugTokenMiddleware(object):
             'access_token': settings.FACEBOOK_DEBUG_TOKEN,
         }
         request.facebook = DjangoFacebook(user)
-        return None
 
 
 class FacebookMiddleware(object):
@@ -82,24 +79,23 @@ class FacebookMiddleware(object):
 
     def get_fb_user_canvas(self, request):
         """ Attempt to find a user using a signed_request (canvas). """
-        fb_user = None
         signed_request = request.REQUEST.get('signed_request')
         if signed_request:
             data = facebook.parse_signed_request(signed_request,
                                                  settings.FACEBOOK_SECRET_KEY)
             if data:
-                if data.get('user_id'):
-                    fb_user = data['user']
-                    fb_user['method'] = 'canvas'
-                    fb_user['uid'] = data['user_id']
-                    fb_user['access_token'] = data['oauth_token']
-
                 if request.method == 'POST':
                     # If this is requset method is POST then prevent rising err 403
                     # from Django CSRF middleware
                     request.META["CSRF_COOKIE"] = _get_new_csrf_key()
                     request.csrf_processing_done = True
-        return fb_user
+
+                if data.get('user_id'):
+                    fb_user = data['user']
+                    fb_user['method'] = 'canvas'
+                    fb_user['uid'] = data['user_id']
+                    fb_user['access_token'] = data['oauth_token']
+                    return fb_user
 
     def get_fb_user(self, request):
         """
@@ -110,13 +106,11 @@ class FacebookMiddleware(object):
         method.
 
         """
-        fb_user = None
         methods = ['get_fb_user_canvas', 'get_fb_user_cookie']
         for method in methods:
             fb_user = getattr(self, method)(request)
-            if (fb_user):
-                break
-        return fb_user
+            if fb_user:
+                return fb_user
 
     def process_request(self, request):
         """
