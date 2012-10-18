@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import auth
+from django.middleware.csrf import _get_new_csrf_key
 
 import facebook
 
@@ -82,15 +83,22 @@ class FacebookMiddleware(object):
     def get_fb_user_canvas(self, request):
         """ Attempt to find a user using a signed_request (canvas). """
         fb_user = None
-        if request.POST.get('signed_request'):
-            signed_request = request.POST["signed_request"]
+        signed_request = request.REQUEST.get('signed_request')
+        if signed_request:
             data = facebook.parse_signed_request(signed_request,
                                                  settings.FACEBOOK_SECRET_KEY)
-            if data and data.get('user_id'):
-                fb_user = data['user']
-                fb_user['method'] = 'canvas'
-                fb_user['uid'] = data['user_id']
-                fb_user['access_token'] = data['oauth_token']
+            if data:
+                if data.get('user_id'):
+                    fb_user = data['user']
+                    fb_user['method'] = 'canvas'
+                    fb_user['uid'] = data['user_id']
+                    fb_user['access_token'] = data['oauth_token']
+
+                if request.method == 'POST':
+                    # If this is requset method is POST then prevent rising err 403
+                    # from Django CSRF middleware
+                    request.META["CSRF_COOKIE"] = _get_new_csrf_key()
+                    request.csrf_processing_done = True
         return fb_user
 
     def get_fb_user(self, request):
@@ -103,7 +111,7 @@ class FacebookMiddleware(object):
 
         """
         fb_user = None
-        methods = ['get_fb_user_cookie', 'get_fb_user_canvas']
+        methods = ['get_fb_user_canvas', 'get_fb_user_cookie']
         for method in methods:
             fb_user = getattr(self, method)(request)
             if (fb_user):
