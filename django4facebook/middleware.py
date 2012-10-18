@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import auth
+
 import facebook
-import datetime
 
 
 class DjangoFacebook(object):
@@ -70,13 +70,6 @@ class FacebookMiddleware(object):
     automatically logged in as that user. We rely on the authentication backend
     to create the user if it does not exist.
 
-    We do not want to persist the facebook login, so we avoid calling
-    auth.login() with the rationale that if they log out via fb:login-button
-    we want them to be logged out of Django also.
-
-    We also want to allow people to log in with other backends, which means we
-    need to be careful before replacing request.user.
-
     """
     def get_fb_user_cookie(self, request):
         """ Attempt to find a facebook user using a cookie. """
@@ -119,8 +112,7 @@ class FacebookMiddleware(object):
 
     def process_request(self, request):
         """
-        Add `facebook` into the request context and attempt to authenticate
-        the user.
+        Add `facebook` into the request context.
 
         If no user was found, request.facebook will be None. Otherwise it will
         contain a DjangoFacebook object containing:
@@ -130,22 +122,26 @@ class FacebookMiddleware(object):
         authentication process
         graph: A GraphAPI object connected to the current user.
 
-        An attempt to authenticate the user is also made. The fb_uid and
-        fb_graphtoken parameters are passed and are available for any
-        AuthenticationBackends.
-
-        The user however is not "logged in" via login() as facebook sessions
-        are ephemeral and must be revalidated on every request.
-
         """
         fb_user = self.get_fb_user(request)
         request.facebook = DjangoFacebook(fb_user) if fb_user else None
 
-        if fb_user and request.user.is_anonymous():
+
+class FacebookAuthenticationMiddleware():
+    """
+    This middleware try to authenticate anonymous users directly
+
+    """
+    def process_request(self, request):
+        """
+        An attempt to authenticate the user is made. The fb_uid and
+        fb_graphtoken parameters are passed and are available for any
+        AuthenticationBackends.
+
+        """
+        if request.facebook and request.user.is_anonymous():
+            fb_user = request.facebook.user
             user = auth.authenticate(fb_uid=fb_user['uid'],
                                      fb_graphtoken=fb_user['access_token'])
             if user:
-                user.last_login = datetime.datetime.now()
-                user.save()
-                request.user = user
-        return None
+                auth.login(request, user)
