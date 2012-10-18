@@ -37,12 +37,9 @@ class FacebookProfileBackend(ModelBackend):
                 graph = facebook.GraphAPI(fb_graphtoken)
                 me = graph.get_object('me')
                 if me:
-                    if me.get('first_name'):
-                        user.first_name = me['first_name']
-                    if me.get('last_name'):
-                        user.last_name = me['last_name']
-                    if me.get('email'):
-                        user.email = me['email']
+                    user.first_name = me.get('first_name') or user.first_name
+                    user.last_name = me.get('last_name') or user.last_name
+                    user.email = me.get('email') or user.email
                     user.save()
             return user
         return None
