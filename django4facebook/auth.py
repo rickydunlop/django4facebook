@@ -46,3 +46,18 @@ class FacebookProfileBackend(ModelBackend):
                     user.save()
             return user
         return None
+
+
+class LoginOnlyFacebookBackend(ModelBackend):
+    """
+    This backend only try to log in a user without auto creating it
+
+    """
+    def authenticate(self, fb_uid=None, fb_graphtoken=None):
+        if fb_uid:
+            try:
+                user = User.objects.get(username=fb_uid)
+            except User.DoesNotExist:
+                pass
+            else:
+                return user
