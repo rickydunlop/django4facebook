@@ -3,7 +3,7 @@ Facebook integration for your Django website
 
 Installation:
 ------------
-Simply add ``django_facebook`` to your INSTALLED_APPS and configure
+Simply add ``django4facebook`` to your INSTALLED_APPS and configure
 the following settings:
 
     FACEBOOK_APP_ID = ''
@@ -74,7 +74,7 @@ begin querying the graph immediately. For example, to get the users friends:
         friends = request.facebook.graph.get_connections('me', 'friends')
         
 To use the middleware, simply add this to your MIDDLEWARE_CLASSES:
-    'django_facebook.middleware.FacebookMiddleware'
+    'django4facebook.middleware.FacebookMiddleware'
 
 
 ``FacebookDebugCookieMiddleware`` allows you to set a cookie in your settings
@@ -95,10 +95,10 @@ If a user accesses your site with a valid facebook cookie, a user
 account is automatically created or retrieved based on the facebook UID.
 
 To use the backend, add this to your AUTHENTICATION_BACKENDS:
-    'django_facebook.auth.FacebookBackend'
+    'django4facebook.auth.FacebookBackend'
 
 To automatically populate your User and Profile models with facebook data, use:
-    'django_facebook.auth.FacebookProfileBackend'
+    'django4facebook.auth.FacebookProfileBackend'
   
 Don't forget to include the default backend if you want to use standard
 logins for users as well:

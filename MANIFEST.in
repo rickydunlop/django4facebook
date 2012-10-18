@@ -1,1 +1,1 @@
-recursive-include django_facebook/templates *.html
+recursive-include django4facebook/templates *.html
