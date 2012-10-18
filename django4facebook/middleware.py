@@ -128,6 +128,12 @@ class FacebookMiddleware(object):
         fb_user = self.get_fb_user(request)
         request.facebook = DjangoFacebook(fb_user) if fb_user else None
 
+    def process_response(self, request, response):
+        # this is required for some lame browsers (a.k.a. IE)
+        # which do not accept session cookies in iframes
+        response['P3P'] = 'CP="CAO PSA OUR"'
+        return response
+
 
 class FacebookAuthenticationMiddleware():
     """
