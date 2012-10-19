@@ -12,6 +12,9 @@ class Settings(object):
     DEBUG_COOKIE = getattr(django_settings, "FACEBOOK_DEBUG_COOKIE", None)
     DEBUG_COOKIE = getattr(django_settings, "FACEBOOK_DEBUG_COOKIE", None)
 
+    SAVE_PROFILE_DATA = getattr(django_settings, "FACEBOOK_SAVE_PROFILE_DATA", True)
+    AUTO_CREATE_USER = getattr(django_settings, "FACEBOOK_AUTO_CREATE_USER", True)
+
     APP_ID = django_settings.FACEBOOK_APP_ID
     SECRET_KEY = django_settings.FACEBOOK_SECRET_KEY
 
