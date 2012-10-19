@@ -1,60 +1,29 @@
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
-import facebook
+
+from .conf import settings
+from .utils import update_user_data
 
 
 class FacebookBackend(ModelBackend):
     """Authenticate a facebook user."""
-    def authenticate(self, fb_uid=None, fb_graphtoken=None):
+    def authenticate(self, django_facebook):
         """
-        If we receive a facebook uid then the cookie has already been
-        validated.
+        Try to authenticate a facebook user. If local user does not exists
+        then create new if settings.FACEBOOK_AUTO_CREATE_USER is True.
+        If new user is created and settings.FACEBOOK_SAVE_PROFILE_DATA is True
+        then autopopulate facebook data into the user's profile.
 
         """
-        if fb_uid:
-            user, created = User.objects.get_or_create(username=fb_uid)
+        user = None
+        if not django_facebook.uid:
             return user
-        return None
-
-
-class FacebookProfileBackend(ModelBackend):
-    """
-    Authenticate a facebook user and autopopulate facebook data into the
-    user's profile.
-
-    """
-    def authenticate(self, fb_uid=None, fb_graphtoken=None):
-        """
-        If we receive a facebook uid then the cookie has already been
-        validated.
-
-        """
-        if fb_uid and fb_graphtoken:
-            user, created = User.objects.get_or_create(username=fb_uid)
-            if created:
-                # It would be nice to replace this with an asynchronous request
-                graph = facebook.GraphAPI(fb_graphtoken)
-                me = graph.get_object('me')
-                if me:
-                    user.first_name = me.get('first_name') or user.first_name
-                    user.last_name = me.get('last_name') or user.last_name
-                    user.email = me.get('email') or user.email
-                    user.save()
-            return user
-        return None
-
-
-class LoginOnlyFacebookBackend(ModelBackend):
-    """
-    This backend only try to log in a user without auto creating it
-
-    """
-    def authenticate(self, fb_uid=None, fb_graphtoken=None):
-        if fb_uid:
-            try:
-                user = User.objects.get(username=fb_uid)
-            except User.DoesNotExist:
-                pass
-            else:
-                return user
+        try:
+            user = User.objects.get(username=django_facebook.uid)
+        except User.DoesNotExist:
+            if settings.AUTO_CREATE_USER:
+                user = User(username=django_facebook.uid)
+                if settings.SAVE_PROFILE_DATA:
+                    update_user_data(user, django_facebook, commit=False)
+                user.save()
+        return user
