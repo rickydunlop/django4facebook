@@ -1,8 +1,8 @@
-from django.conf import settings
 from django.contrib import auth
-from django.middleware.csrf import _get_new_csrf_key
 
 import facebook
+from .conf import settings
+from .utils import get_fb_user
 
 
 class DjangoFacebook(object):
@@ -25,7 +25,7 @@ class FacebookDebugCanvasMiddleware(object):
     def process_request(self, request):
         cp = request.POST.copy()
         request.POST = cp
-        request.POST['signed_request'] = settings.FACEBOOK_DEBUG_SIGNEDREQ
+        request.POST['signed_request'] = settings.DEBUG_SIGNEDREQ
 
 
 class FacebookDebugCookieMiddleware(object):
@@ -40,8 +40,8 @@ class FacebookDebugCookieMiddleware(object):
 
     """
     def process_request(self, request):
-        cookie_name = "fbs_" + settings.FACEBOOK_APP_ID
-        request.COOKIES[cookie_name] = settings.FACEBOOK_DEBUG_COOKIE
+        cookie_name = "fbs_" + settings.APP_ID
+        request.COOKIES[cookie_name] = settings.DEBUG_COOKIE
 
 
 class FacebookDebugTokenMiddleware(object):
@@ -54,8 +54,8 @@ class FacebookDebugTokenMiddleware(object):
     """
     def process_request(self, request):
         user = {
-            'uid': settings.FACEBOOK_DEBUG_UID,
-            'access_token': settings.FACEBOOK_DEBUG_TOKEN,
+            'uid': settings.DEBUG_UID,
+            'access_token': settings.DEBUG_TOKEN,
         }
         request.facebook = DjangoFacebook(user)
 
@@ -69,49 +69,6 @@ class FacebookMiddleware(object):
     to create the user if it does not exist.
 
     """
-    def get_fb_user_cookie(self, request):
-        """ Attempt to find a facebook user using a cookie. """
-        fb_user = facebook.get_user_from_cookie(request.COOKIES,
-            settings.FACEBOOK_APP_ID, settings.FACEBOOK_SECRET_KEY)
-        if fb_user:
-            fb_user['method'] = 'cookie'
-        return fb_user
-
-    def get_fb_user_canvas(self, request):
-        """ Attempt to find a user using a signed_request (canvas). """
-        signed_request = request.REQUEST.get('signed_request')
-        if signed_request:
-            data = facebook.parse_signed_request(signed_request,
-                                                 settings.FACEBOOK_SECRET_KEY)
-            if data:
-                if request.method == 'POST':
-                    # If this is requset method is POST then prevent rising err 403
-                    # from Django CSRF middleware
-                    request.META["CSRF_COOKIE"] = _get_new_csrf_key()
-                    request.csrf_processing_done = True
-
-                if data.get('user_id'):
-                    fb_user = data['user']
-                    fb_user['method'] = 'canvas'
-                    fb_user['uid'] = data['user_id']
-                    fb_user['access_token'] = data['oauth_token']
-                    return fb_user
-
-    def get_fb_user(self, request):
-        """
-        Return a dict containing the facebook user details, if found.
-
-        The dict must contain the auth method, uid, access_token and any
-        other information that was made available by the authentication
-        method.
-
-        """
-        methods = ['get_fb_user_canvas', 'get_fb_user_cookie']
-        for method in methods:
-            fb_user = getattr(self, method)(request)
-            if fb_user:
-                return fb_user
-
     def process_request(self, request):
         """
         Add `facebook` into the request context.
@@ -125,7 +82,7 @@ class FacebookMiddleware(object):
         graph: A GraphAPI object connected to the current user.
 
         """
-        fb_user = self.get_fb_user(request)
+        fb_user = get_fb_user(request)
         request.facebook = DjangoFacebook(fb_user) if fb_user else None
 
     def process_response(self, request, response):
