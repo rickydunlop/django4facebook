@@ -1,16 +1,7 @@
 from django.contrib import auth
 
-import facebook
 from .conf import settings
-from .utils import get_fb_user
-
-
-class DjangoFacebook(object):
-    """ Simple accessor object for the Facebook user. """
-    def __init__(self, user):
-        self.user = user
-        self.uid = user['uid']
-        self.graph = facebook.GraphAPI(user['access_token'])
+from .utils import DjangoFacebook, get_fb_user
 
 
 class FacebookDebugCanvasMiddleware(object):
@@ -105,8 +96,6 @@ class FacebookAuthenticationMiddleware():
 
         """
         if request.facebook and request.user.is_anonymous():
-            fb_user = request.facebook.user
-            user = auth.authenticate(fb_uid=fb_user['uid'],
-                                     fb_graphtoken=fb_user['access_token'])
+            user = auth.authenticate(django_facebook=request.facebook)
             if user:
                 auth.login(request, user)
