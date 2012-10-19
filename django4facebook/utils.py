@@ -4,6 +4,14 @@ import facebook
 from .conf import settings
 
 
+class DjangoFacebook(object):
+    """ Simple accessor object for the Facebook user. """
+    def __init__(self, user):
+        self.user = user
+        self.uid = user['uid']
+        self.graph = facebook.GraphAPI(user['access_token'])
+
+
 def get_fb_user_cookie(request):
     """ Attempt to find a facebook user using a cookie. """
     fb_user = facebook.get_user_from_cookie(request.COOKIES,
@@ -48,3 +56,18 @@ def get_fb_user(request):
         fb_user = method(request)
         if fb_user:
             return fb_user
+
+
+def update_user_data(user, django_facebook, commit=True):
+    """
+    Update first_name, last_name and email of the django user
+    with data from facebook
+
+    """
+    me = django_facebook.graph.get_object('me')
+    if me:
+        user.first_name = me.get('first_name') or user.first_name
+        user.last_name = me.get('last_name') or user.last_name
+        user.email = me.get('email') or user.email
+        if commit:
+            user.save()
