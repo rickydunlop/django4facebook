@@ -15,6 +15,8 @@ class Settings(object):
     SAVE_PROFILE_DATA = getattr(django_settings, "FACEBOOK_SAVE_PROFILE_DATA", True)
     AUTO_CREATE_USER = getattr(django_settings, "FACEBOOK_AUTO_CREATE_USER", True)
 
+    USE_CANVAS_LOGIN = getattr(django_settings, "FACEBOOK_USE_CANVAS_LOGIN", True)
+
     APP_ID = django_settings.FACEBOOK_APP_ID
     SECRET_KEY = django_settings.FACEBOOK_SECRET_KEY
 

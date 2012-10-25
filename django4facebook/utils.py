@@ -51,7 +51,9 @@ def get_fb_user(request):
     method.
 
     """
-    methods = [get_fb_user_canvas, get_fb_user_cookie]
+    methods = [get_fb_user_cookie]
+    if settings.USE_CANVAS_LOGIN:
+        methods.insert(0, get_fb_user_canvas)
     for method in methods:
         fb_user = method(request)
         if fb_user:
