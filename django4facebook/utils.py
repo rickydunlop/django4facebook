@@ -12,6 +12,17 @@ class DjangoFacebook(object):
         self.graph = facebook.GraphAPI(user['access_token'])
 
 
+def get_signed_request_data(request):
+    """
+    Check for signed_request argument in request and parse it
+
+    """
+    signed_request = request.REQUEST.get('signed_request')
+    if signed_request:
+        return facebook.parse_signed_request(signed_request,
+                                             settings.SECRET_KEY)
+
+
 def get_fb_user_cookie(request):
     """ Attempt to find a facebook user using a cookie. """
     fb_user = facebook.get_user_from_cookie(request.COOKIES,
@@ -23,23 +34,20 @@ def get_fb_user_cookie(request):
 
 def get_fb_user_canvas(request):
     """ Attempt to find a user using a signed_request (canvas). """
-    signed_request = request.REQUEST.get('signed_request')
-    if signed_request:
-        data = facebook.parse_signed_request(signed_request,
-                                             settings.SECRET_KEY)
-        if data:
-            if request.method == 'POST':
-                # If this is requset method is POST then prevent rising err 403
-                # from Django CSRF middleware
-                request.META["CSRF_COOKIE"] = _get_new_csrf_key()
-                request.csrf_processing_done = True
+    data = get_signed_request_data(request)
+    if data:
+        if request.method == 'POST':
+            # If this is requset method is POST then prevent rising err 403
+            # from Django CSRF middleware
+            request.META["CSRF_COOKIE"] = _get_new_csrf_key()
+            request.csrf_processing_done = True
 
-            if data.get('user_id'):
-                fb_user = data['user']
-                fb_user['method'] = 'canvas'
-                fb_user['uid'] = data['user_id']
-                fb_user['access_token'] = data['oauth_token']
-                return fb_user
+        if data.get('user_id'):
+            fb_user = data['user']
+            fb_user['method'] = 'canvas'
+            fb_user['uid'] = data['user_id']
+            fb_user['access_token'] = data['oauth_token']
+            return fb_user
 
 
 def get_fb_user(request):
