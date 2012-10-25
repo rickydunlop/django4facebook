@@ -1,5 +1,17 @@
 Facebook integration for your Django website
 =============================================
+This is application is fork of https://github.com/pythonforfacebook/django-facebook
+I renamed the application because in PyPi there is a Django-facebook application
+I've made some refacotoring and improvements:
+
+* Rename the application
+* Use only one authentication backend which can be configured from settings
+* Authentication backend can only try to login without automaticaly create a user
+this is also configurable
+* Add CSRF Excempt for valid signed requests from facebook
+* Add support of session cookies for IE
+* little improvements
+
 
 Installation:
 ------------
@@ -11,7 +23,13 @@ the following settings:
 
     # Optionally set default permissions to request, e.g: ['email', 'user_about_me']
     FACEBOOK_SCOPE = []
-    
+
+    # If you want to disable automatic filling of profile data you can set
+    FACEBOOK_SAVE_PROFILE_DATA = False
+
+    # If you dont want automatic creation of users you can set
+    FACEBOOK_AUTO_CREATE_USER = False
+
     # And for local debugging, use one of the debug middlewares and set:
     FACEBOOK_DEBUG_TOKEN = ''
     FACEBOOK_DEBUG_UID = ''
@@ -32,7 +50,7 @@ this to your base template in the ``<head>`` section:
 And this should be added just before your ``</html>`` tag:
 
     {% facebook_load %}
-    
+
 The ``facebook_load`` template tag inserts the code required to
 asynchronously load the facebook javascript SDK. The ``facebook_init``
 tag calls ``FB.init`` with your configured application settings. It is
@@ -72,7 +90,7 @@ begin querying the graph immediately. For example, to get the users friends:
     def friends(request):
       if request.facebook:
         friends = request.facebook.graph.get_connections('me', 'friends')
-        
+
 To use the middleware, simply add this to your MIDDLEWARE_CLASSES:
     'django4facebook.middleware.FacebookMiddleware'
 
@@ -97,9 +115,6 @@ account is automatically created or retrieved based on the facebook UID.
 To use the backend, add this to your AUTHENTICATION_BACKENDS:
     'django4facebook.auth.FacebookBackend'
 
-To automatically populate your User and Profile models with facebook data, use:
-    'django4facebook.auth.FacebookProfileBackend'
-  
 Don't forget to include the default backend if you want to use standard
 logins for users as well:
     'django.contrib.auth.backends.ModelBackend'
