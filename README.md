@@ -1,7 +1,7 @@
 Facebook integration for your Django website
 =============================================
-This is application is fork of https://github.com/pythonforfacebook/django-facebook
-I renamed the application because in PyPi there is a Django-facebook application
+This is application is fork of https://github.com/pythonforfacebook/django-facebook.
+I renamed the application because in PyPi there is a Django-facebook application.
 I've made some refacotoring and improvements:
 
 * Rename the application
