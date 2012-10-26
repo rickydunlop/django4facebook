@@ -1,8 +1,12 @@
+import logging
+
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 
 from .conf import settings
 from .utils import update_user_data
+
+logger = logging.getLogger(__name__)
 
 
 class FacebookBackend(ModelBackend):
@@ -26,4 +30,5 @@ class FacebookBackend(ModelBackend):
                 if settings.SAVE_PROFILE_DATA:
                     update_user_data(user, django_facebook, commit=False)
                 user.save()
+        logger.info("Succesfully authenticate %s" % unicode(user))
         return user
