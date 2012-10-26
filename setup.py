@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from .django4facebook import __version__
 
 setup(
     name='django4facebook',
-    version='0.1.1',
+    version=__version__,
     description='Facebook integration for your Django website.',
     long_description=open('README.md').read(),
     author='Aidan Lister',
