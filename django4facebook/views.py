@@ -18,7 +18,7 @@ def deauthorize_callback(request):
     logger.info('Deauthorization request from facebook')
     data = get_signed_request_data(request)
     if not (data and data.get('user_id')):
-        logger.debug('Bad deauthorization request')
+        logger.debug('Bad deauthorization request\n\t%s' % data)
         return HttpResponseBadRequest()
 
     if User.objects.filter(pk=data['user_id']).update(is_active=False):

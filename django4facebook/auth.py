@@ -30,5 +30,6 @@ class FacebookBackend(ModelBackend):
                 if settings.SAVE_PROFILE_DATA:
                     update_user_data(user, django_facebook, commit=False)
                 user.save()
-        logger.info("Succesfully authenticate %s" % unicode(user))
+        if user:
+            logger.info("Succesfully authenticate %s" % unicode(user))
         return user
