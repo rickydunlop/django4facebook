@@ -47,7 +47,7 @@ this to your base template in the ``<head>`` section:
         {% block facebook_code %}{% endblock %}
     {% endfacebook %}
 
-And this should be added just before your ``</html>`` tag:
+And this should be added just before your ``</body>`` tag:
 
     {% facebook_load %}
 
@@ -68,7 +68,7 @@ comma-separated list.
 A helpful debugging page to view the status of your facebook login can
 be enabled by adding this to your url configuration:
 
-    (r'^facebook_debug/', direct_to_template, {'template':'facebook_debug.html'}),  
+    (r'^facebook_debug/', direct_to_template, {'template':'facebook_debug.html'}),
 
 
 Once this is in place you are ready to start with the facebook javascript SDK!
