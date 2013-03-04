@@ -1,4 +1,6 @@
 from django.conf import settings as django_settings
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 
 class Settings(object):
@@ -19,6 +21,14 @@ class Settings(object):
 
     APP_ID = django_settings.FACEBOOK_APP_ID
     SECRET_KEY = django_settings.FACEBOOK_SECRET_KEY
+
+    def __init__(self):
+        if hasattr(django_settings, 'AUTH_USER_MODEL'):
+            self.USER_MODEL = get_user_model()
+            self.UID_USER_FIELD = getattr(django_settings, "FACEBOOK_UID_USER_FIELD", 'facebook_id')
+        else:
+            self.USER_MODEL = User
+            self.UID_USER_FIELD = 'username'
 
     def __getattr__(self, attr):
         return getattr(django_settings, attr)

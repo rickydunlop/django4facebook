@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 
 from .conf import settings
@@ -22,11 +21,13 @@ class FacebookBackend(ModelBackend):
         user = None
         if not django_facebook.uid:
             return user
+        user_model = settings.USER_MODEL
+        facebook_uid_field = settings.UID_USER_FIELD
         try:
-            user = User.objects.get(username=django_facebook.uid)
-        except User.DoesNotExist:
+            user = user_model.objects.get(**{facebook_uid_field: django_facebook.uid})
+        except user_model.DoesNotExist:
             if settings.AUTO_CREATE_USER:
-                user = User(username=django_facebook.uid)
+                user = user_model(**{facebook_uid_field: django_facebook.uid})
                 if settings.SAVE_PROFILE_DATA:
                     update_user_data(user, django_facebook, commit=False)
                 user.save()
