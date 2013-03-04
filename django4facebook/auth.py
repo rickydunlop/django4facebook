@@ -4,6 +4,7 @@ from django.contrib.auth.backends import ModelBackend
 
 from .conf import settings
 from .utils import update_user_data
+from .signals import facebook_registration
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ class FacebookBackend(ModelBackend):
             return user
         user_model = settings.USER_MODEL
         facebook_uid_field = settings.UID_USER_FIELD
+
         try:
             user = user_model.objects.get(**{facebook_uid_field: django_facebook.uid})
         except user_model.DoesNotExist:
@@ -31,6 +33,7 @@ class FacebookBackend(ModelBackend):
                 if settings.SAVE_PROFILE_DATA:
                     update_user_data(user, django_facebook, commit=False)
                 user.save()
+                facebook_registration.send(sender=user_model, user=user, django_facebook=django_facebook)
         if user:
             logger.info("Succesfully authenticate %s" % unicode(user))
         return user
