@@ -24,8 +24,13 @@ the following settings:
     # Optionally set default permissions to request, e.g: ['email', 'user_about_me']
     FACEBOOK_SCOPE = []
 
-    # If you want to disable automatic filling of profile data you can set
+    # If you want to disable automatic filling of profile data you can set FACEBOOK_SAVE_PROFILE_DATA
+    # This will work only if you use standard User model
     FACEBOOK_SAVE_PROFILE_DATA = False
+
+    # If you are using Django custom User model set FACEBOOK_UID_USER_FIELD to
+    # the name of the field where you store facebook ids
+    FACEBOOK_UID_USER_FIELD = 'facebook_id'
 
     # If you dont want automatic creation of users you can set
     FACEBOOK_AUTO_CREATE_USER = False
