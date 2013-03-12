@@ -16,6 +16,7 @@ class Settings(object):
 
     SAVE_PROFILE_DATA = getattr(django_settings, "FACEBOOK_SAVE_PROFILE_DATA", True)
     AUTO_CREATE_USER = getattr(django_settings, "FACEBOOK_AUTO_CREATE_USER", True)
+    AUTO_ACTIVATE_USER = getattr(django_settings, "FACEBOOK_AUTO_ACTIVATE_USER", True)
 
     USE_CANVAS_LOGIN = getattr(django_settings, "FACEBOOK_USE_CANVAS_LOGIN", True)
 

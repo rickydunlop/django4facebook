@@ -30,6 +30,8 @@ class FacebookBackend(ModelBackend):
         except user_model.DoesNotExist:
             if settings.AUTO_CREATE_USER:
                 user = user_model(**{facebook_uid_field: django_facebook.uid})
+                if settings.AUTO_ACTIVATE_USER:
+                    user.is_active = True
                 if settings.SAVE_PROFILE_DATA:
                     update_user_data(user, django_facebook, commit=False)
                 user.save()
