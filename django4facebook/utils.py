@@ -76,7 +76,7 @@ def update_user_data(user, django_facebook, commit=True):
     """
     user.username = django_facebook.uid
 
-    me = django_facebook.graph.get_object('me')
+    me = django_facebook.graph.get_object('me?fields=first_name,last_name,email')
     if me:
         user.first_name = me.get('first_name') or user.first_name
         user.last_name = me.get('last_name') or user.last_name
