@@ -17,7 +17,7 @@ def get_signed_request_data(request):
     Check for signed_request argument in request and parse it
 
     """
-    signed_request = request.REQUEST.get('signed_request')
+    signed_request = request.POST.get('signed_request')
     if signed_request:
         return facebook.parse_signed_request(signed_request,
                                              settings.SECRET_KEY)
@@ -26,7 +26,7 @@ def get_signed_request_data(request):
 def get_fb_user_cookie(request):
     """ Attempt to find a facebook user using a cookie. """
     fb_user = facebook.get_user_from_cookie(request.COOKIES,
-        settings.APP_ID, settings.SECRET_KEY)
+                                            settings.APP_ID, settings.SECRET_KEY)
     if fb_user:
         fb_user['method'] = 'cookie'
     return fb_user
