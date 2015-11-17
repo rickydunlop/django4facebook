@@ -9,7 +9,7 @@ class DjangoFacebook(object):
     def __init__(self, user):
         self.user = user
         self.uid = user['uid']
-        self.graph = facebook.GraphAPI(user['access_token'])
+        self.graph = facebook.GraphAPI(access_token=user['access_token'], version=settings.SDK_VERSION)
 
 
 def get_signed_request_data(request):

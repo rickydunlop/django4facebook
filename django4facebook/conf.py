@@ -20,6 +20,8 @@ class Settings(object):
 
     USE_CANVAS_LOGIN = getattr(django_settings, "FACEBOOK_USE_CANVAS_LOGIN", True)
 
+    SDK_VERSION = getattr(django_settings, "FACEBOOK_SDK_VERSION", '2.5')
+
     APP_ID = django_settings.FACEBOOK_APP_ID
     SECRET_KEY = django_settings.FACEBOOK_SECRET_KEY
 
